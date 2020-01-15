@@ -61,7 +61,7 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                            style="position:absolute;right:4em")
                 ),
                 fluidRow(
-                    column(6,h2("Luis D. Verde Arregoitia"),offset = 2),
+                    column(6,h2("Luis D. Verde Arregoitia"),offset = 3),
                     column(3,h4("Twitter -",a(href="https://twitter.com/LuisDVerde","@LuisDVerde"))),
                     column(3,h4("Website -",a(href="https://www.liomys.mx","liomys.mx")))
                 ),
@@ -88,20 +88,23 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                           plotOutput("shotts3")
                 ),
                 br(),
+                hr(),
                 h4("Further reading"),
                 p(a(href="https://luisdva.github.io/rstats/nba-overlap/","Point proximity overlap for NBA shot chart data by Luis Verde Arregoitia")),
                 p(a(href="https://toddwschneider.com/posts/ballr-interactive-nba-shot-charts-with-r-and-shiny/","BallR web app by Todd Schneider")),
-                p(a(href="http://www.macroevoeco.com/uploads/3/9/1/8/39186089/geb_2016__cardillo___warren_.pdf","Cardillo and Warren (2016) Analysing patterns of spatial and nicheoverlap among species at multipleresolutions, Global Ecology and Biogeography"))
+                p(a(href="http://www.macroevoeco.com/uploads/3/9/1/8/39186089/geb_2016__cardillo___warren_.pdf","Cardillo and Warren (2016) Analysing patterns of spatial and nicheoverlap among species at multipleresolutions, Global Ecology and Biogeography")),
+                waiter_show_on_load(color = "white",html = spin_3k())
 )
 
 
 
 server <- function(input, output){
-    W1 <- Waiter$new("Loading...",color = "white")
+    W1 <- Waiter$new(color = "white",id = c("shotts1","shotts3"),html=spin_3k())
     observeEvent(input$player_name1,{
         req(input$player_name1)
         players_xy_out <- shotchartr(input$player_name1)
         W1$show()
+        
         output$shotts1 <- renderPlot({
             ggplot(players_xy_out[[2]], aes(x=X, y=Y)) + 
                 coord_equal()+
@@ -148,10 +151,9 @@ server <- function(input, output){
                       axis.ticks = element_blank(),
                       plot.caption = element_text(color="white"),
                       strip.background = element_blank())  
-            
-        })        
-        W1$hide()
+        })    
     })
+    waiter_hide()
 }
 
 shinyApp(ui, server)
