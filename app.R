@@ -56,7 +56,7 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                            actionButton("github",
                                         label = "View Code",
                                         width = "95px",
-                                        onclick ="window.open(`https://github.com/luisDVA/Caviomorph-Ecomorphology-Resources-App`, '_blank')",
+                                        onclick ="window.open(`https://github.com/luisDVA/nba-overlap-app`, '_blank')",
                                         style="color: #fff; background-color: #4c9ed9; border-color: black"),
                            style="position:absolute;right:4em")
                 ),
