@@ -1,0 +1,12 @@
+name: NBA-shot-overlap
+title: NBA-shot-overlap
+username:
+account: luisdva
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1661809
+bundleId: 2731416
+url: https://luisdva.shinyapps.io/NBA-shot-overlap/
+when: 1579115987.47009
+asMultiple: FALSE
+asStatic: FALSE
