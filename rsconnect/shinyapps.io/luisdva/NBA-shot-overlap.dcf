@@ -5,8 +5,8 @@ account: luisdva
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1661809
-bundleId: 2731416
+bundleId: 3094852
 url: https://luisdva.shinyapps.io/NBA-shot-overlap/
-when: 1579115987.47009
+when: 1588456024.1149
 asMultiple: FALSE
 asStatic: FALSE

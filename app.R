@@ -85,7 +85,7 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                               column(6,plotOutput("shotts1"),align="center"),
                               column(4,uiOutput("ovals"),offset = 0),
                               column(2)),
-                          em("Ties are sorted alphabetically"),
+                          em("Ties are sorted alphabetically. Homonymous players not currently identified."),
                           plotOutput("shotts3")
                 ),
                 br(),
@@ -95,6 +95,7 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                 p(a(href="https://luisdva.github.io/rstats/nba-overlap/","Point proximity overlap for NBA shot chart data by Luis Verde Arregoitia")),
                 p(a(href="https://toddwschneider.com/posts/ballr-interactive-nba-shot-charts-with-r-and-shiny/","BallR web app by Todd Schneider")),
                 p(a(href="http://www.macroevoeco.com/uploads/3/9/1/8/39186089/geb_2016__cardillo___warren_.pdf","Cardillo and Warren (2016) Analysing patterns of spatial and nicheoverlap among species at multipleresolutions, Global Ecology and Biogeography")),
+                p(a(href="http://asbcllc.com/nbastatR/","nbastatR, R's interface to NBA data by Alex Bresler ")),
                 waiter_show_on_load(color = "white",html = spin_3k())
 )
 
