@@ -7,12 +7,13 @@ library(reactable)
 library(shinythemes)
 library(scico)
 library(waiter)
+library(forcats)
 
 # in
 court_points <- read_csv("data/bballcourt.csv")
-Ostats <- read_csv("data/Ostats.csv") %>% as.matrix()
+Ostats <- read_csv("data/Ostats20.csv") %>% as.matrix()
 row.names(Ostats) <- colnames(Ostats)
-shotsdf <- read_csv("data/shotsdf.csv")
+shotsdf <- read_csv("data/shotsdf20.csv")
 thumbs <- read_csv("data/thumbs.csv")
 
 
@@ -20,17 +21,17 @@ shotchartr <- function(player1){
     player1_shots <- shotsdf %>% filter(namePlayer==player1) %>% 
         mutate(face="focal")
     player1_img <- thumbs %>% filter(namePlayer==player1) %>% 
-        mutate(x=177,y=365)
+        mutate(x=177,y=365) %>% slice(1)
     Ostats[player1,] %>% tibble::enframe() %>% 
         top_n(3,value)  %>%
         mutate(value=round(value,4)) %>%
         rename(Player=1,Overlap=2) %>% 
-        arrange(Player) ->top3_Ostats
+        arrange(desc(Overlap),Player) ->top3_Ostats
     top3_names <- top3_Ostats$Player
     top3_shots <- shotsdf %>% filter(namePlayer %in% top3_names) %>% 
-        mutate(face="compare")
+        mutate(face="compare") %>% left_join(top3_Ostats,by=c("namePlayer"="Player"))
     top3_imgs <- thumbs %>% filter(namePlayer %in% top3_names) %>% 
-        mutate(x=177,y=364)
+        mutate(x=177,y=364) %>% left_join(top3_Ostats,by=c("namePlayer"="Player"))
     list(top3_Ostats,player1_shots,top3_shots,player1_img,top3_imgs)
 }
 
@@ -84,7 +85,7 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                               column(6,plotOutput("shotts1"),align="center"),
                               column(4,uiOutput("ovals"),offset = 0),
                               column(2)),
-                          em("Darker shades indicate more shots taken at each location"),
+                          em("Ties are sorted alphabetically"),
                           plotOutput("shotts3")
                 ),
                 br(),
@@ -112,6 +113,11 @@ server <- function(input, output){
                 geom_point(size=4,color="black",
                            aes(fill=num_shots),shape=25,position = "jitter") +
                 scale_fill_scico(palette = "imola",guide=FALSE,direction = -1)+
+                guides(fill=guide_colorbar(barheight  = 0.6,barwidth = 8,
+                                           ticks = FALSE,direction = "horizontal",
+                                           title="shots",title.position = "top",
+                                           label.theme = element_text(size = 8),
+                                           title.hjust = 0.5,title.theme = element_text(size = 11)))+
                 geom_image(data=players_xy_out[[4]],aes(x=x,y=y,image=urlPlayerThumbnail),size=0.2)+
                 draw_court+labs(x="",y="",title = paste(players_xy_out[[2]]$namePlayer))+
                 underline_imgs+
@@ -121,13 +127,15 @@ server <- function(input, output){
                       axis.text = element_blank(),
                       axis.ticks = element_blank(),
                       plot.caption = element_text(color="white"),
-                      strip.background = element_blank())
+                      strip.background = element_blank(),
+            legend.position = c(0.23,0.85),
+            legend.background = element_rect(fill="transparent"))
         })
         
         output$ovals <- 
             renderUI({
                 div(h2("Similar shooting patterns"),
-                    em("Data downloaded 2020-01-10"),
+                    em("Data spans 1997-2020 seasons"),
                     p("Players with highest values of", em("O")," relative to focal player"),
                     reactable(players_xy_out[[1]],
                               defaultColDef = colDef(
@@ -143,15 +151,23 @@ server <- function(input, output){
                 geom_point(size=4,color="black",
                            aes(fill=num_shots),shape=21,position = "jitter") +
                 scale_fill_scico(palette = "lajolla",direction = 1,guide=FALSE)+
+                guides(fill=guide_colorbar(barheight  = 0.6,barwidth = 10,
+                                           ticks = FALSE,direction = "horizontal",
+                                           title="shots",title.position = "top",
+                                           label.theme = element_text(size = 8),
+                                           title.hjust = 0.5,title.theme = element_text(size = 11)))+
                 geom_image(data=players_xy_out[[5]],aes(x=x,y=y,image=urlPlayerThumbnail),size=0.2)+
                 draw_court+underline_imgs+
-                labs(x="",y="")+facet_grid(~namePlayer)+
+                labs(x="",y="")+
+                facet_grid(~fct_reorder(namePlayer,Overlap,.desc=TRUE))+
                 theme(text = element_text(size = 18,family = "NanumGothic"),
                       panel.grid = element_blank(),
                       axis.text = element_blank(),
                       axis.ticks = element_blank(),
                       plot.caption = element_text(color="white"),
-                      strip.background = element_blank())  
+                      strip.background = element_blank(),
+                      legend.position = "bottom",
+                      legend.background = element_rect(fill="transparent"))  
         })    
     })
     waiter_hide()
