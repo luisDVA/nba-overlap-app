@@ -8,7 +8,7 @@ library(shinythemes)
 library(scico)
 library(waiter)
 library(forcats)
-
+library(pushbar)
 # in
 court_points <- read_csv("data/bballcourt.csv")
 Ostats <- read_csv("data/Ostats20.csv") %>% as.matrix()
@@ -47,6 +47,7 @@ underline_imgs <-
 
 ui <- fluidPage(theme=shinytheme("cosmo"),
                 use_waiter(),
+                pushbar_deps(),
                 br(),
                 fluidRow(
                     column(11,
@@ -56,13 +57,12 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                     column(1,
                            actionButton("github",
                                         label = "View Code",
-                                        width = "95px",
                                         onclick ="window.open(`https://github.com/luisDVA/nba-overlap-app`, '_blank')",
                                         style="color: #fff; background-color: #4c9ed9; border-color: black"),
                            style="position:absolute;right:4em")
                 ),
                 fluidRow(
-                    column(6,h2("Luis D. Verde Arregoitia"),offset = 3),
+                    column(3,h4("Luis D. Verde Arregoitia"),offset = 1),
                     column(3,h4("Twitter -",a(href="https://twitter.com/LuisDVerde","@LuisDVerde"))),
                     column(3,h4("Website -",a(href="https://www.liomys.mx","liomys.mx")))
                 ),
@@ -71,15 +71,21 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                 p("The point-proximity metric",em("O"),"measures patterns of co-aggregation by comparing nearest-neighbor distances within and between two sets of XY coordinates. 
     The value of",em("O")," is bounded between 0 and 1. Values close to zero indicate little spatial overlap, a value of ~0.5 is expected if the occurrence points of the two samples are randomly and independently distributed across the same area, and values > 0.5 indicate spatial clustering between the two samples."),
                 br(),
-                h3("Select a player in the input box below"),
                 h5("This app needs an internet connection to retrieve player photos"),
-                sidebarPanel(width = 3,
-                             selectInput(inputId = "player_name1",
+                actionButton("open", "Select player"),
+                pushbar(
+                    id = "myPushbar", # add id to get event
+                                         selectInput(inputId = "player_name1",
                                          label = "Player",
                                          choices = c("enter a player..."="",sort(colnames(Ostats))),
                                          selected = "",selectize = TRUE),
-                             p("How it works:"),
-                             img(src="sideimg.png",width="100%")),
+                    actionButton("closeBAR", "Close"),
+                    br(),
+                    br(),
+                             p("How the",em("O")," metric works, illustrated:"),
+                    br(),
+                                 img(src="sideimg.png",width="100%")
+                                ),
                 mainPanel(width = 9,
                           fluidRow(
                               column(6,plotOutput("shotts1"),align="center"),
@@ -102,6 +108,20 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
 
 
 server <- function(input, output){
+    setup_pushbar() # setup
+    
+    observeEvent(input$open, {
+        pushbar_open(id = "myPushbar")
+    })  
+    
+    observeEvent(input$closeBAR, {
+        pushbar_close()
+    })  
+    
+    output$ev <- renderPrint({
+        input$myPushbar_pushbar_opened
+    })
+    
     W1 <- Waiter$new(color = "white",id = c("shotts1","shotts3"),html=spin_3k())
     observeEvent(input$player_name1,{
         req(input$player_name1)
@@ -116,6 +136,7 @@ server <- function(input, output){
                 scale_fill_scico(palette = "imola",guide=FALSE,direction = -1)+
                 guides(fill=guide_colorbar(barheight  = 0.6,barwidth = 8,
                                            ticks = FALSE,direction = "horizontal",
+                                           frame.colour = "gray",
                                            title="shots",title.position = "top",
                                            label.theme = element_text(size = 8),
                                            title.hjust = 0.5,title.theme = element_text(size = 11)))+
@@ -129,7 +150,7 @@ server <- function(input, output){
                       axis.ticks = element_blank(),
                       plot.caption = element_text(color="white"),
                       strip.background = element_blank(),
-            legend.position = c(0.23,0.85),
+            legend.position = c(0.25,0.85),
             legend.background = element_rect(fill="transparent"))
         })
         
