@@ -9,11 +9,13 @@ library(scico)
 library(waiter)
 library(forcats)
 library(pushbar)
+library(Matrix)
+
 # in
 court_points <- read_csv("data/bballcourt.csv")
-Ostats <- read_csv("data/Ostats20.csv") %>% as.matrix()
+Ostats <- read_csv("data/Ostats2020.csv") %>% as.matrix() %>% Matrix::forceSymmetric()
 row.names(Ostats) <- colnames(Ostats)
-shotsdf <- read_csv("data/shotsdf20.csv")
+shotsdf <- read_csv("data/shotsdf2020.csv")
 thumbs <- read_csv("data/thumbs.csv")
 
 
@@ -50,19 +52,22 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                 pushbar_deps(),
                 br(),
                 fluidRow(
-                    column(11,
+                    column(8,
                            titlePanel("Using point-proximity-overlap statistics to find similar shooting preferences",
                                       windowTitle="NBA shot preference overlap")
                     ),
                     column(1,
                            actionButton("github",
-                                        label = "View Code",
+                                        label = "code",
+                                        icon = icon("github"),
                                         onclick ="window.open(`https://github.com/luisDVA/nba-overlap-app`, '_blank')",
                                         style="color: #fff; background-color: #4c9ed9; border-color: black"),
-                           style="position:absolute;right:4em")
+                           style="height:1em;position:absolute;right:4em;padding:0px 0px")
                 ),
+                br(),
                 fluidRow(
-                    column(3,h4("Luis D. Verde Arregoitia"),offset = 1),
+                    br(),
+                    column(3,h4(strong("Luis D. Verde Arregoitia"))),
                     column(3,h4("Twitter -",a(href="https://twitter.com/LuisDVerde","@LuisDVerde"))),
                     column(3,h4("Website -",a(href="https://www.liomys.mx","liomys.mx")))
                 ),
@@ -70,11 +75,11 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                 br(),
                 p("The point-proximity metric",em("O"),"measures patterns of co-aggregation by comparing nearest-neighbor distances within and between two sets of XY coordinates. 
     The value of",em("O")," is bounded between 0 and 1. Values close to zero indicate little spatial overlap, a value of ~0.5 is expected if the occurrence points of the two samples are randomly and independently distributed across the same area, and values > 0.5 indicate spatial clustering between the two samples."),
-                br(),
                 h5("This app needs an internet connection to retrieve player photos"),
                 actionButton("open", "Select player"),
                 pushbar(
-                    id = "myPushbar", # add id to get event
+                    id = "myPushbar", # add id to get event,
+                    from = "right",
                                          selectInput(inputId = "player_name1",
                                          label = "Player",
                                          choices = c("enter a player..."="",sort(colnames(Ostats))),
@@ -82,11 +87,12 @@ ui <- fluidPage(theme=shinytheme("cosmo"),
                     actionButton("closeBAR", "Close"),
                     br(),
                     br(),
-                             p("How the",em("O")," metric works, illustrated:"),
+                             p("Summarizing player shot preferences for pairwise calculations of ",em("O")),
                     br(),
                                  img(src="sideimg.png",width="100%")
                                 ),
                 mainPanel(width = 9,
+                          br(),
                           fluidRow(
                               column(6,plotOutput("shotts1"),align="center"),
                               column(4,uiOutput("ovals"),offset = 0),
@@ -134,7 +140,7 @@ server <- function(input, output){
                 geom_point(size=4,color="black",
                            aes(fill=num_shots),shape=25,position = "jitter") +
                 scale_fill_scico(palette = "imola",guide=FALSE,direction = -1)+
-                guides(fill=guide_colorbar(barheight  = 0.6,barwidth = 8,
+                guides(fill=guide_colorbar(barheight  = 0.6,barwidth = 7,
                                            ticks = FALSE,direction = "horizontal",
                                            frame.colour = "gray",
                                            title="shots",title.position = "top",
@@ -150,7 +156,7 @@ server <- function(input, output){
                       axis.ticks = element_blank(),
                       plot.caption = element_text(color="white"),
                       strip.background = element_blank(),
-            legend.position = c(0.25,0.85),
+            legend.position = c(0.28,0.85),
             legend.background = element_rect(fill="transparent"))
         })
         
